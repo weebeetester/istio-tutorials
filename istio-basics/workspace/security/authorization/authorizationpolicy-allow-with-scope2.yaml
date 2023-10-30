@@ -1,0 +1,23 @@
+# See more at https://istio.io/latest/docs/tasks/security/authorization/authz-http/
+
+# Run the following command to create the details-viewer policy to allow the productpage workload, which issues requests using the cluster.local/ns/default/sa/bookinfo-productpage 
+# service account, to access the details workload through GET methods:
+
+
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: "details-viewer"
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: details
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/default/sa/bookinfo-productpage"]
+    to:
+    - operation:
+        methods: ["GET"]

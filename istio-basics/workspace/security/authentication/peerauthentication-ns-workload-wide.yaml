@@ -1,0 +1,17 @@
+# See more at https://istio.io/latest/docs/tasks/security/authentication/authn-policy/
+# To set a peer authentication policy for a specific workload, you must configure the selector section and specify the labels that match the desired workload.
+# For example, the following peer authentication policy enables strict mutual TLS for the httpbin.bar workload:
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "httpbin"
+  namespace: "bar"
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  mtls:
+    mode: STRICT
+
+
+# A workload-specific peer authentication policy takes precedence over a namespace-wide policy.

@@ -1,0 +1,14 @@
+# See more at https://istio.io/latest/docs/tasks/security/authorization/authz-http/
+
+# Below policy creates an allow-nothing policy in the default namespace. 
+# The policy doesn’t have a selector field, which applies the policy to every workload in the default namespace. 
+# The spec: field of the policy has the empty value {}. That value means that no traffic is permitted, effectively denying all requests.
+
+
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-nothing
+  namespace: default
+spec:
+  {}

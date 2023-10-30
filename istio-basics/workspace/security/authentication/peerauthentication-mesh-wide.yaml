@@ -1,0 +1,14 @@
+# See more at https://istio.io/latest/docs/tasks/security/authentication/authn-policy/
+# To prevent non-mutual TLS traffic for the whole mesh, set a mesh-wide peer authentication policy with the mutual TLS mode set to STRICT. This priactice (meshwide) is common in enterprises.
+
+# The mesh-wide peer authentication policy should not have a selector and must be applied in the root namespace (see below).
+# This peer authentication policy configures workloads to only accept requests encrypted with TLS. Since it doesn’t specify a value for the selector field, the policy applies to all workloads in the mesh.
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "default"
+  namespace: "istio-system"
+spec:
+  mtls:
+    mode: STRICT

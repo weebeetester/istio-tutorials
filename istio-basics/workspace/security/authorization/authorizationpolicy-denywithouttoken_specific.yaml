@@ -1,0 +1,23 @@
+# See more at https://istio.io/latest/docs/tasks/security/authentication/authn-policy/
+
+# To refine authorization with a token requirement per host, path, or method, change the authorization policy to only require JWT on /headers. 
+# When this authorization rule takes effect, requests to $INGRESS_HOST:$INGRESS_PORT/headers fail with the error code 403. 
+# Requests to all other paths succeed, for example $INGRESS_HOST:$INGRESS_PORT/ip.
+
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: "frontend-ingress"
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]
+    to:
+    - operation:
+        paths: ["/headers"]

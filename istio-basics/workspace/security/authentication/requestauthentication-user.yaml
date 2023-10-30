@@ -1,0 +1,20 @@
+# See more at https://istio.io/latest/docs/tasks/security/authentication/authn-policy/
+# Below example adds a request authentication policy that requires end-user JWT for the ingress gateway.
+
+
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: "jwt-example"
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  jwtRules:
+  - issuer: "testing@secure.istio.io"
+    jwksUri: "https://raw.githubusercontent.com/istio/istio/release-1.19/security/tools/jwt/samples/jwks.json"
+
+
+# If you provide a token in the authorization header, its implicitly default location, Istio validates the token using the public key set, and rejects requests if the bearer token is invalid. 
+# However, requests without tokens are accepted. To reject requests without [valid] tokens, add AuthroizationPolicy.

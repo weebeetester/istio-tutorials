@@ -1,0 +1,15 @@
+# See more at https://istio.io/latest/docs/tasks/security/authentication/authn-policy/
+# To change mutual TLS for all workloads within a particular namespace, use a namespace-wide policy.
+# The specification of the policy is the same as for a mesh-wide policy, but you specify the namespace it applies to under metadata.
+# Again, since it doesn’t specify a value for the selector field, the policy applies to all workloads in the namespace.
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "default"
+  namespace: "foo"
+spec:
+  mtls:
+    mode: STRICT
+
+# A workload-specific peer authentication policy takes precedence over a namespace-wide policy.

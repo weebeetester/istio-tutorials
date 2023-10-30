@@ -1,0 +1,19 @@
+# See more at https://istio.io/latest/docs/tasks/security/authentication/authn-policy/
+
+# To reject requests without valid tokens, add an authorization policy with a rule specifying a DENY action for requests without request principals, shown as notRequestPrincipals: ["*"] in the following example. 
+# Request principals are available only when valid JWT tokens are provided. The rule therefore denies requests without valid tokens.
+
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: "frontend-ingress"
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]
