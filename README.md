@@ -84,8 +84,8 @@ Next Steps:
 See https://istio.io/latest/docs/setup/install/ to add Istio to your Kubernetes cluster.
 
 To configure the istioctl client tool for your workstation,
-add the /Users/puneet/workspace/repositories/istio/bin/istio-1.19.3/bin directory to your environment path variable with:
-         export PATH="$PATH:/Users/puneet/workspace/repositories/istio/bin/istio-1.19.3/bin"
+add the /Users/shaunthesheep/workspace/repositories/istio/bin/istio-1.19.3/bin directory to your environment path variable with:
+         export PATH="$PATH:/Users/shaunthesheep/workspace/repositories/istio/bin/istio-1.19.3/bin"
 
 Begin the Istio pre-installation check by running:
          istioctl x precheck 
