@@ -1264,6 +1264,7 @@ spec:
 ## 6.5 Manual injection of istio-proxy
 kubectl apply -f <(istioctl kube-inject -f istio/istio-1.19.3/samples/httpbin/httpbin.yaml ) -n bar
 
+---
 
 # 7. Security
 
@@ -1502,7 +1503,7 @@ authorizationpolicy.security.istio.io/ratings-viewer created
 
 // Now everything is working
 ```
-
+---
 
 # 8. Useful commands
 
@@ -1523,7 +1524,7 @@ authorizationpolicy.security.istio.io/ratings-viewer created
 >istioctl proxy-config log productpage-v1-564d4686f-4t24x --level=rbac:warning,http:warning,filter:warning
 ```
 
-
+---
 
 # 9. Egress: Accessing external services ( ServiceEntry usage)
 https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/
@@ -1694,15 +1695,7 @@ HTTP/2 200
 
 // Check the log of the sidecar proxy of SOURCE_POD:
  istio-tutorials  kubectl logs "$SOURCE_POD" -c istio-proxy | tail
-2023-11-01T10:02:06.861650Z     info    xdsproxy        connected to upstream XDS server: istiod.istio-system.svc:15012
-[2023-11-01T10:06:41.930Z] "- - -" 0 UH - - "-" 0 0 0 - "-" "-" "-" "-" "-" BlackHoleCluster - 142.251.36.4:443 10.244.0.67:49062 - -
-[2023-11-01T10:06:55.205Z] "- - -" 0 UH - - "-" 0 0 0 - "-" "-" "-" "-" "-" BlackHoleCluster - 151.101.131.5:443 10.244.0.67:39056 - -
-[2023-11-01T10:10:20.538Z] "- - -" 0 - - - "-" 789 6096 75 - "-" "-" "-" "-" "151.101.131.5:443" PassthroughCluster 10.244.0.67:43514 151.101.131.5:443 10.244.0.67:43512 - -
-[2023-11-01T10:10:24.982Z] "- - -" 0 - - - "-" 844 5873 131 - "-" "-" "-" "-" "142.251.36.4:443" PassthroughCluster 10.244.0.67:53918 142.251.36.4:443 10.244.0.67:53916 - -
-[2023-11-01T10:11:02.701Z] "- - -" 0 UH - - "-" 0 0 0 - "-" "-" "-" "-" "-" BlackHoleCluster - 142.251.36.4:443 10.244.0.67:54754 - -
-[2023-11-01T10:11:06.157Z] "- - -" 0 UH - - "-" 0 0 0 - "-" "-" "-" "-" "-" BlackHoleCluster - 151.101.195.5:443 10.244.0.67:57876 - -
-[2023-11-01T10:25:47.107Z] "GET /headers HTTP/1.1" 200 - via_upstream - "-" 0 1152 560 559 "-" "curl/8.4.0" "3c555887-4af0-9379-9796-19666fee3267" "httpbin.org" "54.204.25.77:80" outbound|80||httpbin.org 10.244.0.67:55696 54.204.25.77:80 10.244.0.67:55694 - default
-2023-11-01T10:34:04.963394Z     info    xdsproxy        connected to upstream XDS server: istiod.istio-system.svc:15012
+...
 [2023-11-01T10:36:14.663Z] "- - -" 0 - - - "-" 844 5875 101 - "-" "-" "-" "-" "142.251.36.4:443" outbound|443||www.google.com 10.244.0.67:59172 142.251.36.4:443 10.244.0.67:59170 www.google.com -
 
 // Note the entry related to your HTTPS request to www.google.com.
@@ -1786,7 +1779,7 @@ virtualservice.networking.istio.io/bookinfo   ["bookinfo-gateway"]   ["*"]   2d1
 
 If you want to completely bypass Istio for a specific IP range, you can configure the Envoy sidecars to prevent them from intercepting external requests. This option should be considered as a last resort when, for performance or other reasons, external access cannot be configured using the sidecar. Read more at https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#direct-access-to-external-services
 
-
+---
 
 # 10. Egress: Accessing external services using Egress Gateway
 As per Istio documentation, Egress Gateway configuration does not work with minikube. But actually it does
