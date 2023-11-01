@@ -34,12 +34,12 @@ cluster-1
  > minikube profile cluster-1   //To explicitly switch to cluster-1
 minikube profile was successfully set to cluster-1
 
->minikube version                                 //Shows minikube version
->minikube stop -p cluster-1                       //Stop the cluster
->minikube delete -p cluster-1                     //Delete the cluster
+>minikube version                                 // Shows minikube version
+>minikube stop -p cluster-1                       // Stop the cluster
+>minikube delete -p cluster-1                     // Delete the cluster
 >minikube start                                   // Starts in a docker container if docker is detected, with cluser name 'minikube'
 >minikube start --vm=true                         // Starts in a VM
->minikube start --memory=4096 --driver=hyperkit   //same as above
+>minikube start --memory=4096 --driver=hyperkit   // Same as above
 ```
 ---
 
