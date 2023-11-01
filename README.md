@@ -1,4 +1,6 @@
-# This document describes the different aspects involved in playing around with Istio and associated concepts.
+# Overview
+
+This document describes the different aspects involved in playing around with Istio and associated concepts. It refers to official istio documentation as well as other sources.
 
 ---
 
@@ -38,13 +40,8 @@ minikube profile was successfully set to cluster-1
 >minikube start                                   // Starts in a docker container if docker is detected, with cluser name 'minikube'
 >minikube start --vm=true                         // Starts in a VM
 >minikube start --memory=4096 --driver=hyperkit   //same as above
-
 ```
 ---
----
----
----
-
 
 # 2. Istio Installation & Setup
 ## 2.1 Prerequisites: Make sure that cluster is up and running
@@ -65,7 +62,10 @@ You can view the list of minikube maintainers at: https://github.com/kubernetes/
 ```
 
 
-## 2.3 Download istio latest release
+## 2.3 Installing Istio
+You can install istio by multiple ways, as described at https://istio.io/latest/docs/setup/install/. 
+For our learning purpose, we will use istioctl.
+Start with downloading istio latest release
 ```bash
 // You may decide to download this at istio-tutorials/istio
 istio-tutorials/istio > curl -L https://git.io/getLatestIstio | sh -
@@ -106,7 +106,6 @@ no ready Istio pods in "istio-system"
 
 ## 2.5 Lets check if istio is installed on our cluster(it is not)
 ```bash
-
  istio-tutorials  istioctl verify-install
 0 Istio control planes detected, checking --revision "default" only
 error while fetching revision : the server could not find the requested resource
@@ -138,9 +137,9 @@ kube-system       Active   7m52s
  istio-tutorials  
 ```
 
-## 2.7 Once installed, use verify-install command to check if everything was installed without any problems
+## 2.7 Verify installation
+### Once installed, use verify-install command to check if everything was installed without any problems
 ```bash
-
  istio-tutorials  istioctl verify-install
 1 Istio control planes detected, checking --revision "default" only
 ✔ Deployment: istio-ingressgateway.istio-system checked successfully
@@ -235,7 +234,8 @@ reviews-v2-b7dcd98fb-jz7h5       1/1     Running   0          2m1s
 reviews-v3-5c5cc7b6d-qmt9l       1/1     Running   0          2m1s
 ```
 
-## 2.9 In order for proxy/envoy sidecar to be injected, the namespace has to be applied with a label
+## 2.9 Enable Istio
+###  In order for proxy/envoy sidecar to be injected, the namespace has to be applied with a label
 ```bash
  istio-tutorials  istioctl analyze
 Info [IST0102] (Namespace default) The namespace is not enabled for Istio injection. Run 'kubectl label namespace default istio-injection=enabled' to enable it, or 'kubectl label namespace default istio-injection=disabled' to explicitly mark it as not needing injection.
@@ -298,17 +298,12 @@ reviews-v1-86896b7648-ztr2g      2/2     Running   0          38s
 reviews-v2-b7dcd98fb-ms4t8       2/2     Running   0          38s
 reviews-v3-5c5cc7b6d-l527n       2/2     Running   0          38s
 ```
-
 ---
----
----
----
-
 
 # 3. Install Kiali (used for visualizing+managing service mesh)
-## 3.1 Instll addons: this will install many addons including kiali, jaeger, prometheus, grafana and others
+## 3.1 Install kiali using addons
+### This will install many addons including kiali, jaeger, prometheus, grafana and others
 ```bash
-
  istio-tutorials  kubectl apply -f istio/istio-1.19.3/samples/addons 
 serviceaccount/grafana created
 configmap/grafana created
@@ -358,9 +353,6 @@ http://localhost:20001/kiali
 // Above will open browser with http://localhost:20001/kiali/console/services?duration=60&refresh=10000&namespaces=default
 ```
 ---
----
----
----
 
 # 4. Create Traffic into your mesh
 ## 4.1 First, export IP & Port
@@ -371,7 +363,8 @@ http://localhost:20001/kiali
  istio-tutorials  export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
  istio-tutorials  echo $INGRESS_PORT
 ```
-## 4.2 Now, if you try to test using curl from outside cluster, it will fail as there is no ingress created yet
+## 4.2 Check if accessible from outside cluster
+### Now, if you try to test using curl from outside cluster, it will fail as there is no ingress created yet
 ```bash
 istio-tutorials  echo http://$INGRESS_HOST:$INGRESS_PORT/productpage
 http://192.168.66.3:31483/productpage
@@ -379,10 +372,10 @@ http://192.168.66.3:31483/productpage
 istio-tutorials  curl "http://$INGRESS_HOST:$INGRESS_PORT/productpage"                                                                                                   ✘
 curl: (7) Failed to connect to 192.168.66.3 port 31483 after 108 ms: Couldn't connect to server
 ```
-## 4.3 Lets create a gateway(which will configure service mesh to accept traffic from outside the cluster). There's also a virtual service in below file. 
+## 4.3 Create a Gateway
+### Lets create a gateway(which will configure service mesh to accept traffic from outside the cluster). There's also a virtual service in below file. 
 
 ```bash
-
  istio-tutorials  cat istio-basics/workspace/traffic-management/ingress/bookinfo-gateway.yaml 
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -470,14 +463,10 @@ istio-tutorials  export PATH=$PWD/istio/istio-1.19.3/bin:$PATH
 istio-tutorials  istioctl dashboard kiali
 http://localhost:20001/kiali
 ```
-
----
----
----
 ---
 
 # 5. Explore Istio objects
-### 5.1 All deployed istio object  within istio-system namespace
+## 5.1 All deployed istio object  within istio-system namespace
 ```bash
  istio-tutorials  kubectl -n istio-system get all
 NAME                                       READY   STATUS    RESTARTS   AGE
@@ -520,7 +509,8 @@ replicaset.apps/kiali-7c9d5f9f96                 1         1         1       48m
 replicaset.apps/prometheus-5d5d6d6fc             1         1         1       48m
 ```
 
-## 5.2 View service istio-ingressgateway (service for the actual gateway controller , the pod using envoy proxy)
+## 5.2 View service istio-ingressgateway 
+### This is the service in front of actual gateway controller (the pod using envoy proxy)
 ```bash
  istio-tutorials  kubectl -n istio-system get svc istio-ingressgateway -o yaml                                                                                                                                            ✘
 apiVersion: v1
@@ -584,7 +574,6 @@ spec:
   type: LoadBalancer
 status:
   loadBalancer: {}
-
  ```
 ## 5.3 View actual gateway controller pod
 ```bash
@@ -899,7 +888,7 @@ status:
 
 ```
 
-## NOTE!!!! Multiple kubernetes service listening on SAME port
+## **NOTE!!!! Multiple kubernetes service listening on SAME port
 ```bash
 istio-tutorials  kubectl get svc -o wide
 NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE   SELECTOR
@@ -912,11 +901,7 @@ ratings           ClusterIP   10.104.100.84   <none>        9080/TCP            
 reviews           ClusterIP   10.97.242.9     <none>        9080/TCP            17m   app=reviews
 
 ## Above output shows that you can have multiple k8s services exposting SAME port (9080 in above exammple).
-
 ```
----
----
----
 ---
 
 # 6. Istio Objects detailed descriptions
@@ -926,7 +911,6 @@ reviews           ClusterIP   10.97.242.9     <none>        9080/TCP            
 https://istio.io/latest/docs/tasks/traffic-management/ingress/
 
 ```bash
-
 kubectl apply -f - <<EOF
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -974,7 +958,6 @@ A virtual service lets you configure how requests are routed to a service within
 https://istio.io/latest/docs/concepts/traffic-management/#introducing-istio-traffic-management
 
 ```bash
-
 kubectl apply -f - <<EOF
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -1038,7 +1021,6 @@ EOF
 
 ## 6.1 Example: Use GW for a specific host
 ```bash
-
  istio-tutorials  cat istio-basics/workspace/traffic-management/ingress/bookinfo-gateway-with-specific-host.yaml 
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -1098,7 +1080,6 @@ virtualservice.networking.istio.io/bookinfo created
 ## Lets test it
  istio-tutorials  curl -s -HHost:bookinfo.app http://$INGRESS_HOST:$INGRESS_PORT/productpage | grep -o "<title>.*</title>"
 <title>Simple Bookstore App</title>
-
 ```
 
 ## 6.2 Virtual Service (between K8s deployment and k8s services)
@@ -1177,7 +1158,7 @@ spec:
  
 ```
 
-## DestinationRule
+## 6.3 DestinationRule
 Along with virtual services, destination rules are a key part of Istio’s traffic routing functionality. You can think of virtual services as how you route your traffic to a given destination, and then you use destination rules to configure what happens to traffic for that destination. Destination rules are applied after virtual service routing rules are evaluated, so they apply to the traffic’s “real” destination.
 
 In particular, you use destination rules to specify named service subsets, such as grouping all a given service’s instances by version. You can then use these service subsets in the routing rules of virtual services to control the traffic to different instances of your services.
@@ -1185,7 +1166,6 @@ In particular, you use destination rules to specify named service subsets, such 
 Destination rules also let you customize Envoy’s traffic policies when calling the entire destination service or a particular service subset, such as your preferred load balancing model, TLS security mode, or circuit breaker settings. You can see a complete list of destination rule options in the Destination Rule reference https://istio.io/latest/docs/reference/config/networking/destination-rule/ .
 
 ```bash
-
  istio-tutorials  cat istio-basics/workspace/traffic-management/request-routing/destination-rule1.yaml 
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -1267,12 +1247,12 @@ spec:
       mode: ISTIO_MUTUAL
 ```
 
-## 6.3 Demo Traffic Routing (VS,DestinationRule, Timout, fault-injection, retry, CircutBreaking) 
-## Refer to https://istio.io/latest/docs/tasks/traffic-management/
+## 6.4 Demo Traffic Routing (VS,DestinationRule, Timout, fault-injection, retry, CircutBreaking) 
+### Refer to https://istio.io/latest/docs/tasks/traffic-management/
 
 
-## 6.4 Tool for making concurrent requests
-## We can use a tool (h2load) to make concurrent requests . It can be helpful while testing circut breaking with istio.
+## **Tool for making concurrent requests
+#### We can use a tool (h2load) to make concurrent requests . It can be helpful while testing circut breaking with istio.
 ```bash
 >h2load -n1000 -c1 'http://'"$INGRESS_HOST"':'"$INGRESS_PORT"'/productpage'
   // Above will filer n(1000) requests with c(1) concurrent clients
@@ -1330,12 +1310,10 @@ replicaset.apps/httpbin-5c44d89fd9   1         1         1       66s
  istio-tutorials  kubectl exec "$(kubectl get pod -l app=httpbin -n bar -o jsonpath={.items..metadata.name})" -c istio-proxy -n bar -- curl "http://productpage.default:9080" -s -o /dev/null -w "%{http_code}\n"
 
 200
-
 ```
 
 ### Now lets configure a PeerAuthenticationPolicy for default ns with mutual TSL mode STRICT.
 ```bash
-
 kubectl apply -f - <<EOF
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
@@ -1364,7 +1342,6 @@ command terminated with exit code 56
 ### then apply the allow-nothing policy for default namespace
 
 ```bash
-
  istio-tutorials  cat istio-basics/workspace/security/authorization/authorizationpolicy-allow-nothing-ns-wide.yaml 
 # See more at https://istio.io/latest/docs/tasks/security/authorization/authz-http/
 
@@ -1422,7 +1399,6 @@ authorizationpolicy.security.istio.io/productpage-viewer created
 <!DOCTYPE html>
 
 // Notice that only the product page GET is working, nothing else (including rest of the service) is available.
-
 ```
 
 
@@ -1528,9 +1504,610 @@ authorizationpolicy.security.istio.io/ratings-viewer created
 ```
 
 
+# 8. Useful commands
 
-# TODO
-## Egress
-## ServiceEntry
-## Certificate Management
-## ...
+```bash
+// set path to be able to invoke istioctl
+>export PATH=$PWD/istio/istio-1.19.3/bin:$PATH
+
+// see all possible options for istioctl
+>istioctl --help
+
+// show log levels for individual properties
+>istioctl proxy-config log productpage-v1-564d4686f-4t24x 
+
+// set log levels  to debug for individual properties
+>istioctl proxy-config log productpage-v1-564d4686f-4t24x --level=rbac:debug,http:debug,filter:debug
+
+// set log levels back to default(warning) for individual properties
+>istioctl proxy-config log productpage-v1-564d4686f-4t24x --level=rbac:warning,http:warning,filter:warning
+```
+
+
+
+# 9. Egress: Accessing external services ( ServiceEntry usage)
+https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/
+
+Because all outbound traffic from an Istio-enabled pod is redirected to its sidecar proxy by default, accessibility of URLs outside of the cluster depends on the configuration of the proxy. 
+By default, Istio configures the Envoy proxy to pass through requests for unknown services. Although this provides a convenient way to get started with Istio, configuring stricter control is usually preferable.
+
+**External services are those services that are not defined in Istio’s internal service registry.
+
+This task shows you how to access external services in three different ways:
+
+- Allow the Envoy proxy to pass requests through to services that are not configured inside the mesh.
+- Configure service entries to provide controlled access to external services.
+- Completely bypass the Envoy proxy for a specific range of IPs.
+
+
+```bash
+// Prerequisites
+
+// 1. deploy an app with curl in it
+ istio-tutorials  kubectl apply -f istio/istio-1.19.3/samples/sleep/sleep.yaml 
+serviceaccount/sleep created
+service/sleep created
+deployment.apps/sleep created
+
+// 2. Set the SOURCE_POD environment variable to the name of your source pod:
+ istio-tutorials  export SOURCE_POD=$(kubectl get pod -l app=sleep -o jsonpath='{.items..metadata.name}')
+
+```
+## 9.1 Envoy passthrough to external services
+
+Istio has an installation option, meshConfig.outboundTrafficPolicy.mode, that configures the sidecar handling of external services, that is, those services that are not defined in Istio’s internal service registry. If this option is set to ALLOW_ANY, the Istio proxy lets calls to unknown services pass through. If the option is set to REGISTRY_ONLY, then the Istio proxy blocks any host without an HTTP service or service entry defined within the mesh. ALLOW_ANY is the default value, allowing you to start evaluating Istio quickly, without controlling access to external services. You can then decide to configure access to external services later.
+
+```bash
+// Run the following command to verify that meshConfig.outboundTrafficPolicy.mode option is set to ALLOW_ANY or is omitted:
+// You should see ALLOW_ANY or no output  (default ALLOW_ANY)
+ istio-tutorials  kubectl get istiooperator installed-state -n istio-system -o jsonpath='{.spec.meshConfig.outboundTrafficPolicy.mode}'
+ istio-tutorials  
+
+// Make a couple of requests to external HTTPS services from the SOURCE_POD to confirm successful 200 responses:
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sI https://www.google.com | grep  "HTTP/"; 
+HTTP/2 200 
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sI https://edition.cnn.com | grep  "HTTP/";    
+HTTP/2 200 
+
+// You can see from above that you successfully sent egree traffic from your mesh. 
+```
+
+But this simple approach to access external services, has the drawback that you lose Istio monitoring and control for traffic to external services. The next section shows you how to monitor and control your mesh’s access to external services.
+
+
+## 9.2 Controlled access to external services (Using ServiceEntry)
+
+Using Istio ServiceEntry configurations, you can access any publicly accessible service from within your Istio cluster. This section shows you how to configure access to an external HTTP service, httpbin.org, as well as an external HTTPS service, www.google.com without losing Istio’s traffic monitoring and control features.
+
+### Change to the blocking-by-default policy
+To demonstrate the controlled way of enabling access to external services, you need to change the meshConfig.outboundTrafficPolicy.mode option from the ALLOW_ANY mode to the REGISTRY_ONLY mode.
+
+**In our case, since we used istioctl to install istio,  we can either unistall+reinstall with additional arguments or just run the below one to UPDATE the existing installation
+
+```bash
+istio-tutorials  istioctl install --set profile=demo -y --set meshConfig.outboundTrafficPolicy.mode=REGISTRY_ONLY
+✔ Istio core installed 
+✔ Istiod installed
+✔ Ingress gateways installed
+✔ Egress gateways installed
+✔ Installation complete 
+  Made this installation the default for injection and validation.
+
+// Now check if the flag is set correctly, you should see REGISTEY_ONLY
+ istio-tutorials  kubectl get istiooperator installed-state -n istio-system -o jsonpath='{.spec.meshConfig.outboundTrafficPolicy.mode}'
+REGISTRY_ONLY%   
+```
+
+Make a couple of requests to external HTTPS services from the SOURCE_POD to verify they are now blocked:
+
+
+```bash
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sI https://www.google.com | grep  "HTTP/" 
+command terminated with exit code 35
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sI https://edition.cnn.google.com | grep  "HTTP/" 
+command terminated with exit code 35
+```
+
+
+
+### 9.2.1 Access an external HTTP service (Using ServiceEntry)
+
+```bash
+
+// First create a ServiceEntry to allow access to an external HTTP service ( httpbin.org in this example ).
+
+ istio-tutorials  kubectl apply -f - << EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin-ext
+spec:
+  hosts:
+  - httpbin.org
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP
+  resolution: DNS
+  location: MESH_EXTERNAL
+EOF
+serviceentry.networking.istio.io/httpbin-ext created
+
+// Make a request to the external HTTP service from SOURCE_POD:
+
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sS http://httpbin.org/headers
+{
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+    "User-Agent": "curl/8.4.0", 
+    "X-Amzn-Trace-Id": "Root=1-654227ab-67f5212834285ec65e42c1d7", 
+    "X-B3-Sampled": "1", 
+    "X-B3-Spanid": "ec849552efd0f7a0", 
+    "X-B3-Traceid": "bcda1e63318f6759ec849552efd0f7a0", 
+    "X-Envoy-Attempt-Count": "1", 
+    "X-Envoy-Decorator-Operation": "httpbin.org:80/*", 
+    "X-Envoy-Peer-Metadata": "ChkKDkFQUF9DT05UQUlORVJTEgcaBXNsZWVwChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwodCgxJTlNUQU5DRV9JUFMSDRoLMTAuMjQ0LjAuNjcKGQoNSVNUSU9fVkVSU0lPThIIGgYxLjE5LjMKoQEKBkxBQkVMUxKWASqTAQoOCgNhcHASBxoFc2xlZXAKJAoZc2VjdXJpdHkuaXN0aW8uaW8vdGxzTW9kZRIHGgVpc3RpbwoqCh9zZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1uYW1lEgcaBXNsZWVwCi8KI3NlcnZpY2UuaXN0aW8uaW8vY2Fub25pY2FsLXJldmlzaW9uEggaBmxhdGVzdAoaCgdNRVNIX0lEEg8aDWNsdXN0ZXIubG9jYWwKHwoETkFNRRIXGhVzbGVlcC05NDU0Y2M0NzYtaDVoZDIKFgoJTkFNRVNQQUNFEgkaB2RlZmF1bHQKSQoFT1dORVISQBo+a3ViZXJuZXRlczovL2FwaXMvYXBwcy92MS9uYW1lc3BhY2VzL2RlZmF1bHQvZGVwbG95bWVudHMvc2xlZXAKGAoNV09SS0xPQURfTkFNRRIHGgVzbGVlcA==", 
+    "X-Envoy-Peer-Metadata-Id": "sidecar~10.244.0.67~sleep-9454cc476-h5hd2.default~default.svc.cluster.local"
+  }
+}
+
+// Note the headers added by the Istio sidecar proxy: X-Envoy-Decorator-Operation.
+
+
+// Check the log of the sidecar proxy of SOURCE_POD:
+
+ istio-tutorials  kubectl logs "$SOURCE_POD" -c istio-proxy | tail
+...
+[2023-11-01T10:25:47.107Z] "GET /headers HTTP/1.1" 200 - via_upstream - "-" 0 1152 560 559 "-" "curl/8.4.0" "3c555887-4af0-9379-9796-19666fee3267" "httpbin.org" "54.204.25.77:80" outbound|80||httpbin.org 10.244.0.67:55696 54.204.25.77:80 10.244.0.67:55694 - default
+
+Note the entry related to your HTTP request to httpbin.org/headers.
+```
+
+### 9.2.2 Access an external HTTPS service (Using ServiceEntry)
+
+```bash
+// Create a ServiceEntry to allow access to an external HTTPS service.
+
+ istio-tutorials  kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: google
+spec:
+  hosts:
+  - www.google.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  resolution: DNS
+  location: MESH_EXTERNAL
+EOF
+serviceentry.networking.istio.io/google created
+
+
+// Make a request to the external HTTPS service from SOURCE_POD:
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sSI https://www.google.com | grep  "HTTP/"
+HTTP/2 200 
+
+
+// Check the log of the sidecar proxy of SOURCE_POD:
+ istio-tutorials  kubectl logs "$SOURCE_POD" -c istio-proxy | tail
+2023-11-01T10:02:06.861650Z     info    xdsproxy        connected to upstream XDS server: istiod.istio-system.svc:15012
+[2023-11-01T10:06:41.930Z] "- - -" 0 UH - - "-" 0 0 0 - "-" "-" "-" "-" "-" BlackHoleCluster - 142.251.36.4:443 10.244.0.67:49062 - -
+[2023-11-01T10:06:55.205Z] "- - -" 0 UH - - "-" 0 0 0 - "-" "-" "-" "-" "-" BlackHoleCluster - 151.101.131.5:443 10.244.0.67:39056 - -
+[2023-11-01T10:10:20.538Z] "- - -" 0 - - - "-" 789 6096 75 - "-" "-" "-" "-" "151.101.131.5:443" PassthroughCluster 10.244.0.67:43514 151.101.131.5:443 10.244.0.67:43512 - -
+[2023-11-01T10:10:24.982Z] "- - -" 0 - - - "-" 844 5873 131 - "-" "-" "-" "-" "142.251.36.4:443" PassthroughCluster 10.244.0.67:53918 142.251.36.4:443 10.244.0.67:53916 - -
+[2023-11-01T10:11:02.701Z] "- - -" 0 UH - - "-" 0 0 0 - "-" "-" "-" "-" "-" BlackHoleCluster - 142.251.36.4:443 10.244.0.67:54754 - -
+[2023-11-01T10:11:06.157Z] "- - -" 0 UH - - "-" 0 0 0 - "-" "-" "-" "-" "-" BlackHoleCluster - 151.101.195.5:443 10.244.0.67:57876 - -
+[2023-11-01T10:25:47.107Z] "GET /headers HTTP/1.1" 200 - via_upstream - "-" 0 1152 560 559 "-" "curl/8.4.0" "3c555887-4af0-9379-9796-19666fee3267" "httpbin.org" "54.204.25.77:80" outbound|80||httpbin.org 10.244.0.67:55696 54.204.25.77:80 10.244.0.67:55694 - default
+2023-11-01T10:34:04.963394Z     info    xdsproxy        connected to upstream XDS server: istiod.istio-system.svc:15012
+[2023-11-01T10:36:14.663Z] "- - -" 0 - - - "-" 844 5875 101 - "-" "-" "-" "-" "142.251.36.4:443" outbound|443||www.google.com 10.244.0.67:59172 142.251.36.4:443 10.244.0.67:59170 www.google.com -
+
+// Note the entry related to your HTTPS request to www.google.com.
+
+```
+
+### 9.2.3 Manage traffic to external services
+
+Similar to inter-cluster requests, Istio routing rules can also be set for external services that are accessed using ServiceEntry configurations. In this example, you set a timeout rule on calls to the httpbin.org service.
+
+```bash
+// From inside the pod being used as the test source, make a curl request to the /delay endpoint of the httpbin.org external service:
+
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- time curl -o /dev/null -sS -w "%{http_code}\n" http://httpbin.org/delay/5
+200
+real    0m 5.65s
+user    0m 0.00s
+sys     0m 0.00s
+
+// The request should return 200 (OK) in approximately 5 seconds.
+
+
+// Use kubectl to set a 3s timeout on calls to the httpbin.org external service:
+ 
+ istio-tutorials  kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin-ext
+spec:
+  hosts:
+    - httpbin.org
+  http:
+  - timeout: 3s
+    route:
+      - destination:
+          host: httpbin.org
+        weight: 100
+EOF
+virtualservice.networking.istio.io/httpbin-ext created
+
+
+// Wait a few seconds, then make the curl request again:
+
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- time curl -o /dev/null -sS -w "%{http_code}\n" http://httpbin.org/delay/5
+504
+real    0m 3.01s
+user    0m 0.00s
+sys     0m 0.00s
+
+// This time a 504 (Gateway Timeout) appears after 3 seconds. Although httpbin.org was waiting 5 seconds, Istio cut off the request at 3 seconds.
+```
+
+
+### 9.2.4 Cleanup the controlled access to external services
+
+
+```bash
+ istio-tutorials  kubectl get vs,se
+NAME                                             GATEWAYS               HOSTS             AGE
+virtualservice.networking.istio.io/bookinfo      ["bookinfo-gateway"]   ["*"]             2d13h
+virtualservice.networking.istio.io/httpbin-ext                          ["httpbin.org"]   4m19s
+
+NAME                                           HOSTS                LOCATION        RESOLUTION   AGE
+serviceentry.networking.istio.io/google        ["www.google.com"]   MESH_EXTERNAL   DNS          17m
+serviceentry.networking.istio.io/httpbin-ext   ["httpbin.org"]      MESH_EXTERNAL   DNS          28m
+
+ istio-tutorials  kubectl delete vs httpbin-ext
+virtualservice.networking.istio.io "httpbin-ext" deleted
+
+ istio-tutorials  kubectl delete se google httpbin-ext
+serviceentry.networking.istio.io "google" deleted
+serviceentry.networking.istio.io "httpbin-ext" deleted
+
+ istio-tutorials  kubectl get vs,se                   
+NAME                                          GATEWAYS               HOSTS   AGE
+virtualservice.networking.istio.io/bookinfo   ["bookinfo-gateway"]   ["*"]   2d13h
+```
+
+## 9.3 Direct access to external services
+
+If you want to completely bypass Istio for a specific IP range, you can configure the Envoy sidecars to prevent them from intercepting external requests. This option should be considered as a last resort when, for performance or other reasons, external access cannot be configured using the sidecar. Read more at https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#direct-access-to-external-services
+
+
+
+# 10. Egress: Accessing external services using Egress Gateway
+As per Istio documentation, Egress Gateway configuration does not work with minikube. But actually it does
+Please refer to documentation at https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/
+
+The Accessing External Services task shows how to configure Istio to allow access to external HTTP and HTTPS services from applications inside the mesh. There, the external services are called directly from the client sidecar. 
+
+This example also shows how to configure Istio to call external services, although this time indirectly via a dedicated egress gateway service.
+
+Istio uses ingress and egress gateways to configure load balancers executing at the edge of a service mesh. An ingress gateway allows you to define entry points into the mesh that all incoming traffic flows through. Egress gateway is a symmetrical concept; it defines exit points from the mesh. Egress gateways allow you to apply Istio features, for example, monitoring and route rules, to traffic exiting the mesh.
+
+Consider an organization that has a strict security requirement that all traffic leaving the service mesh must flow through a set of dedicated nodes. These nodes will run on dedicated machines, separated from the rest of the nodes running applications in the cluster. These special nodes will serve for policy enforcement on the egress traffic and will be monitored more thoroughly than other nodes.
+
+Another use case is a cluster where the application nodes don’t have public IPs, so the in-mesh services that run on them cannot access the Internet. Defining an egress gateway, directing all the egress traffic through it, and allocating public IPs to the egress gateway nodes allows the application nodes to access external services in a controlled way.
+
+
+## 10.1 Egress gateway for HTTP traffic
+
+Lets first confirm that traffic from within mesh to an external service is not open
+
+```bash
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sI https://edition.cnn.com/politics 
+command terminated with exit code 35
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sSL -o /dev/null -D - http://edition.cnn.com/politics     
+HTTP/1.1 502 Bad Gateway
+date: Wed, 01 Nov 2023 11:45:45 GMT
+server: envoy
+content-length: 0
+
+// Notice the -L flag of curl which instructs curl to follow redirects.
+
+```
+
+### 10.1.1 Now, create a ServiceEntry for edition.cnn.com
+
+```bash
+ istio-tutorials  kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cnn
+spec:
+  hosts:
+  - edition.cnn.com
+  ports:
+  - number: 80
+    name: http-port
+    protocol: HTTP
+  - number: 443
+    name: https
+    protocol: HTTPS
+  resolution: DNS
+EOF
+serviceentry.networking.istio.io/cnn created
+```
+### 10.1.2 Verify that your ServiceEntry was applied correctly by sending an HTTP request to http://edition.cnn.com/politics.
+
+```bash
+ istio-tutorials kubectl exec "$SOURCE_POD" -c sleep -- curl -sSL -o /dev/null -D - http://edition.cnn.com/politics
+HTTP/1.1 301 Moved Permanently
+...
+location: https://edition.cnn.com/politics
+...
+
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+```
+### 10.1.3 Create an egress Gateway for edition.cnn.com, port 80, and a destination rule for traffic directed to the egress gateway.
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-egressgateway
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - edition.cnn.com
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: egressgateway-for-cnn
+spec:
+  host: istio-egressgateway.istio-system.svc.cluster.local
+  subsets:
+  - name: cnn
+EOF
+
+gateway.networking.istio.io/istio-egressgateway created
+destinationrule.networking.istio.io/egressgateway-for-cnn created
+```
+
+### 10.1.4 Define a VirtualService to direct traffic from the sidecars to the egress gateway and from the egress gateway to the external service:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: direct-cnn-through-egress-gateway
+spec:
+  hosts:
+  - edition.cnn.com
+  gateways:
+  - istio-egressgateway
+  - mesh
+  http:
+  - match:
+    - gateways:
+      - mesh
+      port: 80
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        subset: cnn
+        port:
+          number: 80
+      weight: 100
+  - match:
+    - gateways:
+      - istio-egressgateway
+      port: 80
+    route:
+    - destination:
+        host: edition.cnn.com
+        port:
+          number: 80
+      weight: 100
+EOF
+
+virtualservice.networking.istio.io/direct-cnn-through-egress-gateway created
+```
+
+### 10.1.5 Resend the HTTP request to http://edition.cnn.com/politics
+The output should be the same as in the step 2.
+```bash
+ istio-tutorials kubectl exec "$SOURCE_POD" -c sleep -- curl -sSL -o /dev/null -D - http://edition.cnn.com/politics
+HTTP/1.1 301 Moved Permanently
+...
+location: https://edition.cnn.com/politics
+...
+
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+...
+```
+### 10.1.6 Check the log of the istio-egressgateway pod for a line corresponding to our request. If Istio is deployed in the istio-system namespace, the command to print the log is:
+
+
+
+```bash
+istio-tutorials  kubectl logs -l istio=egressgateway -c istio-proxy -n istio-system | tail
+[2023-11-01T11:59:56.883Z] "GET /politics HTTP/2" 301 - via_upstream - "-" 0 0 41 41 "10.244.0.67" "curl/8.4.0" "085155d7-7ec9-9a5f-8049-a821b27f72c4" "edition.cnn.com" "151.101.3.5:80" outbound|80||edition.cnn.com 10.244.0.61:35544 10.244.0.61:8080 10.244.0.67:36494 - -
+2023-11-01T12:00:03.719701Z     info    xdsproxy        connected to upstream XDS server: istiod.istio-system.svc:15012
+```
+Note that you only redirected the traffic from port 80 to the egress gateway. The HTTPS traffic to port 443 went directly (via SE) to edition.cnn.com.
+
+### 10.1.7 Cleanup HTTP Gateway
+
+```bash
+ istio-tutorials  kubectl delete gateway istio-egressgateway
+gateway.networking.istio.io "istio-egressgateway" deleted
+ istio-tutorials  kubectl delete serviceentry cnn
+serviceentry.networking.istio.io "cnn" deleted
+ istio-tutorials  kubectl delete virtualservice direct-cnn-through-egress-gateway
+virtualservice.networking.istio.io "direct-cnn-through-egress-gateway" deleted
+ istio-tutorials  kubectl delete destinationrule egressgateway-for-cnn
+destinationrule.networking.istio.io "egressgateway-for-cnn" deleted
+```
+
+## 10.2 Egress gateway for HTTPS traffic
+
+In this section you direct HTTPS traffic (TLS originated by the application) through an egress gateway. You need to specify port 443 with protocol TLS in a corresponding ServiceEntry, an egress Gateway and a VirtualService.
+
+Lets first confirm that traffic from within mesh to an external service is not open
+
+```bash
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sI https://edition.cnn.com/politics 
+command terminated with exit code 35
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sSL -o /dev/null -D - http://edition.cnn.com/politics     
+HTTP/1.1 502 Bad Gateway
+date: Wed, 01 Nov 2023 11:45:45 GMT
+server: envoy
+content-length: 0
+
+// Notice the -L flag of curl which instructs curl to follow redirects.
+```
+
+### 10.2.1 Define a ServiceEntry for edition.cnn.com:
+```bash
+ istio-tutorials  kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cnn
+spec:
+  hosts:
+  - edition.cnn.com
+  ports:
+  - number: 443
+    name: tls
+    protocol: TLS
+  resolution: DNS
+EOF
+
+serviceentry.networking.istio.io/cnn created
+```
+
+### 10.2.2 Verify that your ServiceEntry was applied correctly by sending an HTTPS request to https://edition.cnn.com/politics.
+
+```bash
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sSL -o /dev/null -D - https://edition.cnn.com/politics
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+...
+```
+### 10.2.3 Create an egress Gateway for edition.cnn.com, a destination rule and a virtual service to direct the traffic through the egress gateway and from the egress gateway to the external service.
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-egressgateway
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+  - port:
+      number: 443
+      name: tls
+      protocol: TLS
+    hosts:
+    - edition.cnn.com
+    tls:
+      mode: PASSTHROUGH
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: egressgateway-for-cnn
+spec:
+  host: istio-egressgateway.istio-system.svc.cluster.local
+  subsets:
+  - name: cnn
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: direct-cnn-through-egress-gateway
+spec:
+  hosts:
+  - edition.cnn.com
+  gateways:
+  - mesh
+  - istio-egressgateway
+  tls:
+  - match:
+    - gateways:
+      - mesh
+      port: 443
+      sniHosts:
+      - edition.cnn.com
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        subset: cnn
+        port:
+          number: 443
+  - match:
+    - gateways:
+      - istio-egressgateway
+      port: 443
+      sniHosts:
+      - edition.cnn.com
+    route:
+    - destination:
+        host: edition.cnn.com
+        port:
+          number: 443
+      weight: 100
+EOF
+
+gateway.networking.istio.io/istio-egressgateway created
+destinationrule.networking.istio.io/egressgateway-for-cnn created
+virtualservice.networking.istio.io/direct-cnn-through-egress-gateway created
+```
+
+### 10.2.4 Send an HTTPS request to https://edition.cnn.com/politics. The output should be the same as before.
+```bash
+ istio-tutorials  kubectl exec "$SOURCE_POD" -c sleep -- curl -sSL -o /dev/null -D - https://edition.cnn.com/politics
+HTTP/2 200 
+content-type: text/html; charset=utf-8
+...
+```
+### 10.2.5 Check the log of the egress gateway’s proxy. 
+
+```bash
+ istio-tutorials  kubectl logs -l istio=egressgateway -n istio-system
+ ...
+[2023-11-01T12:14:50.188Z] "- - -" 0 - - - "-" 791 2480891 369 - "-" "-" "-" "-" "151.101.195.5:443" outbound|443||edition.cnn.com 10.244.0.61:58100 10.244.0.61:8443 10.244.0.67:60140 edition.cnn.com -
+```
+
+### 10.2.6 Cleanup HTTPS gateway
+
+```bash
+ istio-tutorials  kubectl delete serviceentry cnn
+serviceentry.networking.istio.io "cnn" deleted
+ istio-tutorials  kubectl delete gateway istio-egressgateway
+gateway.networking.istio.io "istio-egressgateway" deleted
+ istio-tutorials  kubectl delete virtualservice direct-cnn-through-egress-gateway
+virtualservice.networking.istio.io "direct-cnn-through-egress-gateway" deleted
+ istio-tutorials  kubectl delete destinationrule egressgateway-for-cnn
+destinationrule.networking.istio.io "egressgateway-for-cnn" deleted
+```
+
