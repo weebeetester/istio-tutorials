@@ -1,6 +1,6 @@
 # Overview
 
-This document describes the different aspects involved in playing around with Istio and associated concepts. It refers to official istio documentation as well as other sources.
+Purpose of this document is to help learn istio and it's associated concepts, with hands-on approach. Information on this page comes from various sources including official istio documentation. 
 
 ---
 
