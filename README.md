@@ -1,5 +1,5 @@
 # Overview
-
+Istio is a service mesh that extends Kubernetes to provide traffic management, telemetry, security, and policy for complex deployments.
 Purpose of this document is to help learn istio and it's associated concepts, with hands-on approach. Information on this page comes from various sources including official istio documentation. 
 
 ---
